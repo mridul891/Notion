@@ -14,7 +14,7 @@ export const Navbar = () => {
     <SessionProvider>
       <div
         className={cn(
-          "z-50 fixed top-0 w-full px-5 py-2 flex items-center justify-between bg-white dark:bg-[#161618] shadow-md transition-all md:py-5"
+          "z-50 fixed top-0 w-full px-5 py-2 flex items-center justify-between bg-white dark:bg-[#161618] transition-all md:py-5"
         )}
       >
         {/* Logo */}
