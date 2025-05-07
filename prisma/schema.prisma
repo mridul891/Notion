@@ -21,10 +21,10 @@ model Document {
   isArchieved    Boolean
   parentDocument String?
   content        String?
-  coverImage     String?
+  coverImage     String? 
   icon           String?
-  isPublished    Boolean
-  isShareable    Boolean
+  isPublished    Boolean  @default(false)
+  isShareable    Boolean  @default(false)
 
   parent   Document?  @relation("ParentChild", fields: [parentDocument], references: [id])
   children Document[] @relation("ParentChild")
