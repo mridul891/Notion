@@ -35,3 +35,13 @@ export async function POST(req: Request) {
   }
 }
 
+export async function UPDATE(req: Request) {
+  const body = await req.json();
+
+  const { userId, content, coverImage, icon, id } = body;
+
+  if (!id || !userId) {
+    return new NextResponse("Missing Id or userId  ");
+  }
+  // const newPost = await prisma.document.
+}
