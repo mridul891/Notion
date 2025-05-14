@@ -1,12 +1,14 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, MenuIcon } from "lucide-react";
-import { useParams, usePathname } from "next/navigation";
-import { ComponentRef, useRef, useState } from "react";
+import { ComponentRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import UserItems from "./User-item";
+import { useSession } from "next-auth/react";
+import axios from "axios";
+
+
 const Navigation = () => {
-  const pathName = usePathname();
   const isMobile = useMediaQuery("(max-width:768px)");
 
   const isResizingRef = useRef(false);
@@ -14,6 +16,23 @@ const Navigation = () => {
   const navBarRef = useRef<ComponentRef<"div">>(null);
   const [isResetting, setIsResetting] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(isMobile);
+
+  const { data: session } = useSession();
+
+
+  useEffect(() => {
+
+    const fetchDocuments = async () => {
+      const postName = await axios.get(`/api/document/get`, {
+        params: {
+          userId: session?.user?.id,
+        },
+      });
+      console.log(postName);
+    };
+
+    fetchDocuments();
+  }, [session?.user?.id]);
 
   const handleOnMouseDown = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -73,7 +92,6 @@ const Navigation = () => {
     }
   };
 
-
   return (
     <>
       <aside
@@ -95,7 +113,7 @@ const Navigation = () => {
         </div>
 
         <div>
-          <UserItems/>
+          <UserItems />
         </div>
         <div className="mt-4">
           <p>Documents</p>

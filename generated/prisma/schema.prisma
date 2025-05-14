@@ -23,12 +23,20 @@ model Document {
   content        String?
   coverImage     String?
   icon           String?
-  isPublished    Boolean
-  isShareable    Boolean
+  isPublished    Boolean @default(false)
+  isShareable    Boolean @default(false)
 
   parent   Document?  @relation("ParentChild", fields: [parentDocument], references: [id])
   children Document[] @relation("ParentChild")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String?
+  email     String   @unique
+  image     String?
+  createdAt DateTime @default(now())
 }
