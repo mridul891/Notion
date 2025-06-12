@@ -18,7 +18,7 @@ model Document {
   id             String  @id @default(uuid())
   title          String
   userId         String
-  isArchieved    Boolean
+  isArchieved    Boolean @default(false)
   parentDocument String?
   content        String?
   coverImage     String?
@@ -35,8 +35,7 @@ model Document {
 
 model User {
   id        String   @id @default(uuid())
-  name      String?
   email     String   @unique
-  image     String?
+  password  String
   createdAt DateTime @default(now())
 }

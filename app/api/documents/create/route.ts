@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function POST(req: Request) {
+export async function POST(req: Request,res : Response) {
   try {
     const body = await req.json();
     const {
@@ -16,6 +16,7 @@ export async function POST(req: Request) {
       isShareable,
     } = body;
 
+
     const document = await prisma.document.create({
       data: {
         title,
@@ -29,9 +30,11 @@ export async function POST(req: Request) {
         isShareable,
       },
     });
-    return NextResponse.json(document);
+    console.log(document);
+    return NextResponse.json(document, { status: 201 });
   } catch (error) {
-    return NextResponse.json({ message: error });
+    console.log(error);
+    return NextResponse.json({ status: 401 });
   }
 }
 

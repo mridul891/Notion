@@ -1,12 +1,14 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, MenuIcon } from "lucide-react";
+import { ChevronLeft, MenuIcon, PlusCircle, Search } from "lucide-react";
 import { ComponentRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import UserItems from "./User-item";
 import { useSession } from "next-auth/react";
-import axios from "axios";
-
+import axios, { AxiosError } from "axios";
+import { Item } from "@/components/Item";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 const Navigation = () => {
   const isMobile = useMediaQuery("(max-width:768px)");
@@ -16,23 +18,25 @@ const Navigation = () => {
   const navBarRef = useRef<ComponentRef<"div">>(null);
   const [isResetting, setIsResetting] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(isMobile);
-
+  const [posts, setPosts] = useState([]);
   const { data: session } = useSession();
-
+  const [reFreshFetchDocuments, setReFreshFetchDocuments] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-
-    const fetchDocuments = async () => {
-      const postName = await axios.get(`/api/document/get`, {
-        params: {
-          userId: session?.user?.id,
-        },
-      });
-      console.log(postName);
-    };
-
     fetchDocuments();
-  }, [session?.user?.id]);
+  }, [reFreshFetchDocuments]);
+
+  const fetchDocuments = async () => {
+    const postName = await axios.get(`/api/documents/get`, {
+      params: {
+        // userId: session?.user?.id,
+        userId: "abc123",
+      },
+    });
+    console.log(postName);
+    setPosts(postName.data.posts);
+  };
 
   const handleOnMouseDown = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -72,11 +76,10 @@ const Navigation = () => {
       sideBarRef.current.style.width = isMobile ? "100%" : "200px";
       navBarRef.current.style.setProperty(
         "width",
-        isMobile ? "0" : "calc(100%-240px"
+        isMobile ? "0" : "calc(100%-240px)"
       );
       navBarRef.current.style.setProperty("left", isMobile ? "100%" : "240px");
     }
-
     setTimeout(() => setIsResetting(false), 300);
   };
 
@@ -89,6 +92,38 @@ const Navigation = () => {
       navBarRef.current.style.setProperty("left", "0");
 
       setTimeout(() => setIsResetting(false), 300);
+    }
+  };
+
+  const Newdata = {
+    title: "Getting Started with c++",
+    userId: "abc123",
+  };
+  // used to create a new page
+
+  const handleCreate = async (postId) => {
+    try {
+      await axios.post("/api/documents/create", {
+       ...Newdata,
+        parentDocument: postId || null ,
+      });
+      toast.success("New note Created!");
+      setReFreshFetchDocuments((prev) => !prev);
+    } catch (error: unknown) {
+      if (axios.isAxiosError(error)) {
+        // Now TypeScript knows error is of type AxiosError
+        if (error.response?.data?.message) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error("An unexpected error occurred.");
+        }
+
+        console.error("Axios error:", error);
+      } else {
+        // If it's not an Axios error
+        console.error("Unknown error:", error);
+        toast.error("Something went wrong.");
+      }
     }
   };
 
@@ -114,9 +149,19 @@ const Navigation = () => {
 
         <div>
           <UserItems />
+          <Item onClick={()=>handleCreate(null)} label="New Page" icon={PlusCircle} />
+          <Item label="Search" icon={Search} onClick={() => {}} />
         </div>
-        <div className="mt-4">
-          <p>Documents</p>
+
+        <div>
+          {posts.map((post) => (
+            <div key={post.id}>
+              <div onClick={() => router.push(`/documents/${post.id}`)}>
+                {post.title}
+              </div>
+              <Item onClick={()=>handleCreate(post.id)} label="" icon={PlusCircle} />
+            </div>
+          ))}
         </div>
         {/* This is basically the element that used to change the width of the sidebar width */}
         <div
