@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function POST(req: Request,res : Response) {
+export async function POST(req: Request) {
   try {
     const body = await req.json();
     const {
@@ -38,12 +38,12 @@ export async function POST(req: Request,res : Response) {
   }
 }
 
-export async function UPDATE(req: Request) {
+export async function PUT(req: Request) {
   const body = await req.json();
 
   const { userId, content, coverImage, icon, id } = body;
 
-  if (!id || !userId) {
+  if (!id || !userId || !content || !coverImage || !icon) {
     return new NextResponse("Missing Id or userId  ");
   }
   // const newPost = await prisma.document.

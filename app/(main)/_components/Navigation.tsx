@@ -4,11 +4,13 @@ import { ChevronLeft, MenuIcon, PlusCircle, Search } from "lucide-react";
 import { ComponentRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import UserItems from "./User-item";
-import { useSession } from "next-auth/react";
-import axios, { AxiosError } from "axios";
+// import { useSession } from "next-auth/react";
+import axios from "axios";
 import { Item } from "@/components/Item";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+
+type Post = { id: string; title: string };
 
 const Navigation = () => {
   const isMobile = useMediaQuery("(max-width:768px)");
@@ -18,8 +20,8 @@ const Navigation = () => {
   const navBarRef = useRef<ComponentRef<"div">>(null);
   const [isResetting, setIsResetting] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(isMobile);
-  const [posts, setPosts] = useState([]);
-  const { data: session } = useSession();
+  const [posts, setPosts] = useState<Post[]>([]);
+  // const { data: session } = useSession();
   const [reFreshFetchDocuments, setReFreshFetchDocuments] = useState(false);
   const router = useRouter();
 
@@ -101,11 +103,11 @@ const Navigation = () => {
   };
   // used to create a new page
 
-  const handleCreate = async (postId) => {
+  const handleCreate = async (postId: string | null) => {
     try {
       await axios.post("/api/documents/create", {
-       ...Newdata,
-        parentDocument: postId || null ,
+        ...Newdata,
+        parentDocument: postId || null,
       });
       toast.success("New note Created!");
       setReFreshFetchDocuments((prev) => !prev);
@@ -149,17 +151,25 @@ const Navigation = () => {
 
         <div>
           <UserItems />
-          <Item onClick={()=>handleCreate(null)} label="New Page" icon={PlusCircle} />
+          <Item
+            onClick={() => handleCreate(null)}
+            label="New Page"
+            icon={PlusCircle}
+          />
           <Item label="Search" icon={Search} onClick={() => {}} />
         </div>
 
         <div>
-          {posts.map((post) => (
-            <div key={post.id}>
+          {posts.map((post, index) => (
+            <div key={index}>
               <div onClick={() => router.push(`/documents/${post.id}`)}>
                 {post.title}
               </div>
-              <Item onClick={()=>handleCreate(post.id)} label="" icon={PlusCircle} />
+              <Item
+                onClick={() => handleCreate(post.id)}
+                label=""
+                icon={PlusCircle}
+              />
             </div>
           ))}
         </div>

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const RedirectPage = () => {
@@ -11,7 +11,7 @@ const RedirectPage = () => {
     }, 5000);
 
     return () => clearTimeout(timer); // Cleanup timeout
-  }, []);
+  }, [router]);
 
 
   return (

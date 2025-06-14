@@ -4,9 +4,6 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
-
-import { useState } from "react";
-
 const DoucmentsPage = () => {
   const { data: session } = useSession();
 
