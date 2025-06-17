@@ -4,11 +4,14 @@ import { ChevronDown, ChevronRight, ChevronLeft, MenuIcon, PlusCircle, Search } 
 import { ComponentRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import UserItems from "./User-item";
-// import { useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import axios from "axios";
 import { Item } from "@/components/Item";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface Post {
   id: string;
@@ -19,6 +22,7 @@ interface Post {
 
 const Navigation = () => {
   const isMobile = useMediaQuery("(max-width:768px)");
+  const { data: session } = useSession();
 
   const isResizingRef = useRef(false);
   const sideBarRef = useRef<ComponentRef<"aside">>(null);
@@ -26,22 +30,27 @@ const Navigation = () => {
   const [isResetting, setIsResetting] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(isMobile);
   const [posts, setPosts] = useState<Post[]>([]);
-  // const { data: session } = useSession();
   const [isLoading, setIsLoading] = useState(true);
   const [reFreshFetchDocuments, setReFreshFetchDocuments] = useState(false);
   const router = useRouter();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newDocumentTitle, setNewDocumentTitle] = useState("");
+  const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchDocuments();
-  }, [reFreshFetchDocuments]);
+    if (session?.user?.email) {
+      fetchDocuments();
+    }
+  }, [reFreshFetchDocuments, session?.user?.email]);
 
   const fetchDocuments = async () => {
+    if (!session?.user?.email) return;
+    
     try {
       setIsLoading(true);
       const response = await axios.get(`/api/documents/get`, {
         params: {
-          // userId: session?.user?.id,
-          userId: "abc123",
+          userId: session.user.email,
         },
       });
       setPosts(response.data.documents || []);
@@ -111,32 +120,37 @@ const Navigation = () => {
     }
   };
 
-  const Newdata = {
-    title: "Getting Started with c++",
-    userId: "abc123",
-  };
-  // used to create a new page
+  const handleCreate = async () => {
+    if (!session?.user?.email) {
+      toast.error("Please sign in to create documents");
+      return;
+    }
 
-  const handleCreate = async (postId: string | null) => {
+    if (!newDocumentTitle.trim()) {
+      toast.error("Please enter a title for the document");
+      return;
+    }
+
     try {
       await axios.post("/api/documents/create", {
-        ...Newdata,
-        parentDocument: postId || null,
+        title: newDocumentTitle,
+        userId: session.user.email,
+        parentDocument: selectedParentId,
       });
       toast.success("New note Created!");
       setReFreshFetchDocuments((prev) => !prev);
+      setIsDialogOpen(false);
+      setNewDocumentTitle("");
+      setSelectedParentId(null);
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        // Now TypeScript knows error is of type AxiosError
         if (error.response?.data?.message) {
           toast.error(error.response.data.message);
         } else {
           toast.error("An unexpected error occurred.");
         }
-
         console.error("Axios error:", error);
       } else {
-        // If it's not an Axios error
         console.error("Unknown error:", error);
         toast.error("Something went wrong.");
       }
@@ -174,7 +188,10 @@ const Navigation = () => {
           </div>
           <div className="ml-auto flex items-center gap-x-2">
             <Item
-              onClick={() => handleCreate(post.id)}
+              onClick={() => {
+                setSelectedParentId(post.id);
+                setIsDialogOpen(true);
+              }}
               label=""
               icon={PlusCircle}
             />
@@ -214,7 +231,10 @@ const Navigation = () => {
         <div>
           <UserItems />
           <Item
-            onClick={() => handleCreate(null)}
+            onClick={() => {
+              setSelectedParentId(null);
+              setIsDialogOpen(true);
+            }}
             label="New Page"
             icon={PlusCircle}
           />
@@ -236,7 +256,6 @@ const Navigation = () => {
             ))
           )}
         </div>
-        {/* This is basically the element that used to change the width of the sidebar width */}
         <div
           onMouseDown={handleOnMouseDown}
           onClick={resetWidth}
@@ -262,6 +281,30 @@ const Navigation = () => {
           )}
         </nav>
       </div>
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create New Document</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Input
+              placeholder="Enter document title..."
+              value={newDocumentTitle}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewDocumentTitle(e.target.value)}
+              className="w-full"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleCreate}>
+              Create
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
