@@ -1,6 +1,6 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { ChevronLeft, MenuIcon, PlusCircle, Search } from "lucide-react";
+import { ChevronDown, ChevronRight, ChevronLeft, MenuIcon, PlusCircle, Search } from "lucide-react";
 import { ComponentRef, useEffect, useRef, useState } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import UserItems from "./User-item";
@@ -10,7 +10,12 @@ import { Item } from "@/components/Item";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
-type Post = { id: string; title: string };
+interface Post {
+  id: string;
+  title: string;
+  children?: Post[];
+  parentDocument?: string | null;
+}
 
 const Navigation = () => {
   const isMobile = useMediaQuery("(max-width:768px)");
@@ -22,6 +27,7 @@ const Navigation = () => {
   const [isCollapsed, setIsCollapsed] = useState(isMobile);
   const [posts, setPosts] = useState<Post[]>([]);
   // const { data: session } = useSession();
+  const [isLoading, setIsLoading] = useState(true);
   const [reFreshFetchDocuments, setReFreshFetchDocuments] = useState(false);
   const router = useRouter();
 
@@ -30,14 +36,22 @@ const Navigation = () => {
   }, [reFreshFetchDocuments]);
 
   const fetchDocuments = async () => {
-    const postName = await axios.get(`/api/documents/get`, {
-      params: {
-        // userId: session?.user?.id,
-        userId: "abc123",
-      },
-    });
-    console.log(postName);
-    setPosts(postName.data.posts);
+    try {
+      setIsLoading(true);
+      const response = await axios.get(`/api/documents/get`, {
+        params: {
+          // userId: session?.user?.id,
+          userId: "abc123",
+        },
+      });
+      setPosts(response.data.documents || []);
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+      toast.error("Failed to fetch documents");
+      setPosts([]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleOnMouseDown = (
@@ -66,8 +80,8 @@ const Navigation = () => {
 
   const handleMouseUp = () => {
     isResizingRef.current = false;
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    document.removeEventListener("mousemove", handleMouseMove);
+    document.removeEventListener("mouseup", handleMouseUp);
   };
 
   const resetWidth = () => {
@@ -129,6 +143,54 @@ const Navigation = () => {
     }
   };
 
+  const DocumentItem = ({ post, level = 0 }: { post: Post; level?: number }) => {
+    const [isExpanded, setIsExpanded] = useState(true);
+    const hasChildren = post.children && post.children.length > 0;
+
+    return (
+      <div>
+        <div 
+          className="group min-h-[27px] text-sm py-1 pr-3 w-full hover:bg-purple/5 flex items-center text-muted-foreground font-medium"
+          style={{ paddingLeft: `${level * 12 + 12}px` }}
+        >
+          {hasChildren && (
+            <div
+              role="button"
+              className="h-full hover:bg-neutral-300 dark:hover:bg-neutral-600 mr-1"
+              onClick={() => setIsExpanded(!isExpanded)}
+            >
+              {isExpanded ? (
+                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+              ) : (
+                <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground/50" />
+              )}
+            </div>
+          )}
+          <div 
+            onClick={() => router.push(`/documents/${post.id}`)}
+            className="flex-1 cursor-pointer"
+          >
+            {post.title}
+          </div>
+          <div className="ml-auto flex items-center gap-x-2">
+            <Item
+              onClick={() => handleCreate(post.id)}
+              label=""
+              icon={PlusCircle}
+            />
+          </div>
+        </div>
+        {isExpanded && hasChildren && post.children && (
+          <div className="mt-1 pl-3">
+            {post.children.map((child) => (
+              <DocumentItem key={child.id} post={child} level={level + 1} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       <aside
@@ -159,19 +221,20 @@ const Navigation = () => {
           <Item label="Search" icon={Search} onClick={() => {}} />
         </div>
 
-        <div>
-          {posts.map((post, index) => (
-            <div key={index}>
-              <div onClick={() => router.push(`/documents/${post.id}`)}>
-                {post.title}
-              </div>
-              <Item
-                onClick={() => handleCreate(post.id)}
-                label=""
-                icon={PlusCircle}
-              />
+        <div className="mt-2">
+          {isLoading ? (
+            <div className="p-4 text-center text-muted-foreground">
+              Loading documents...
             </div>
-          ))}
+          ) : posts.length === 0 ? (
+            <div className="p-4 text-center text-muted-foreground">
+              No documents found
+            </div>
+          ) : (
+            posts.map((post) => (
+              <DocumentItem key={post.id} post={post} />
+            ))
+          )}
         </div>
         {/* This is basically the element that used to change the width of the sidebar width */}
         <div
