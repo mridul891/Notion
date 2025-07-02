@@ -6,7 +6,8 @@ import { z } from "zod";
 const updateDocumentSchema = z.object({
   id: z.string().min(1, "Document ID is required"),
   userId: z.string().min(1, "User ID is required"),
-  title: z.string().min(1, "Title is required"),
+  title: z.string().min(1, "Title is required").optional(),
+  content : z.string().optional()
 });
 
 export async function PATCH(req: Request) {
@@ -34,7 +35,8 @@ export async function PATCH(req: Request) {
     const document = await prisma.document.update({
       where: { id: validatedData.id },
       data: {
-        title: validatedData.title,
+        title: validatedData?.title,
+        content : validatedData?.content
       },
       include: {
         parent: true,

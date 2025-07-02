@@ -1,9 +1,10 @@
-import React from 'react'
+
+import Tiptap from "@/components/TipTap";
+import React from "react";
 
 const page = () => {
-  return (
-    <div>DocumentsPAge</div>
-  )
-}
 
-export default page
+  return <Tiptap />;
+};
+
+export default page;
