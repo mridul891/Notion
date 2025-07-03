@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { MenuBar } from "./MenuBar";
 
-export default function TiptapEditor({  }) {
+export default function TiptapEditor({}) {
   const [content, setContent] = useState("");
 
   const editor = useEditor({
@@ -32,13 +32,19 @@ export default function TiptapEditor({  }) {
   });
 
   useEffect(() => {
+    const getData = setTimeout(() => {
+      
+    }, 2000);
+  }, [content]);
+
+  useEffect(() => {
     return () => {
       editor?.destroy();
     };
   }, [editor]);
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 ">
+    <div className="max-w-4xl mx-auto  ">
       <div className=" rounded-md p-4  border-none focus-within:outline-none">
         {editor && <MenuBar editor={editor} />}
         <EditorContent

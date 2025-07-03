@@ -128,18 +128,9 @@ exports.Prisma.DocumentScalarFieldEnum = {
   parentDocument: 'parentDocument',
   content: 'content',
   coverImage: 'coverImage',
-  icon: 'icon',
-  isPublished: 'isPublished',
   isShareable: 'isShareable',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
-};
-
-exports.Prisma.UserScalarFieldEnum = {
-  id: 'id',
-  email: 'email',
-  password: 'password',
-  createdAt: 'createdAt'
 };
 
 exports.Prisma.SortOrder = {
@@ -159,8 +150,7 @@ exports.Prisma.NullsOrder = {
 
 
 exports.Prisma.ModelName = {
-  Document: 'Document',
-  User: 'User'
+  Document: 'Document'
 };
 
 /**

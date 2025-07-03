@@ -1,19 +1,26 @@
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
+import { useEffect } from "react";
 
 // Validation schema for document update
 const updateDocumentSchema = z.object({
   id: z.string().min(1, "Document ID is required"),
   userId: z.string().min(1, "User ID is required"),
   title: z.string().min(1, "Title is required").optional(),
-  content : z.string().optional()
+  content: z.string().optional(),
+  isArchieved: z.boolean().optional(),
+  coverImage: z.string().optional(),
+  isShareable :z.boolean().optional()
 });
 
 export async function PATCH(req: Request) {
+
+
+
   try {
     const body = await req.json();
-    
+
     // Validate request body
     const validatedData = updateDocumentSchema.parse(body);
 
@@ -36,7 +43,10 @@ export async function PATCH(req: Request) {
       where: { id: validatedData.id },
       data: {
         title: validatedData?.title,
-        content : validatedData?.content
+        content: validatedData?.content,
+        isArchieved: validatedData?.isArchieved,
+        coverImage: validatedData?.coverImage,
+        isShareable:validatedData?.isShareable
       },
       include: {
         parent: true,
