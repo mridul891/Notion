@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
 
@@ -7,21 +7,19 @@ const createDocumentSchema = z.object({
   title: z.string().min(1, "Title is required"),
   userId: z.string().min(1, "User ID is required"),
   isArchieved: z.boolean().optional().default(false),
-  parentDocument: z.string().nullable().optional(),
+  parentDocument: z.string().nullable().optional().default(null),
   content: z.string().nullable().optional(),
   coverImage: z.string().nullable().optional(),
-  icon: z.string().nullable().optional(),
-  isPublished: z.boolean().optional().default(false),
   isShareable: z.boolean().optional().default(false),
 });
 
-export async function POST(req: Request) {
+export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    
+    console.log("the value of body is ",body)
     // Validate request body
     const validatedData = createDocumentSchema.parse(body);
-
+    console.log(validatedData)
     // Check if parent document exists if parentDocument is provided
     if (validatedData.parentDocument) {
       const parentExists = await prisma.document.findUnique({
@@ -35,7 +33,7 @@ export async function POST(req: Request) {
         );
       }
     }
-
+    console.log("reached here")
     const document = await prisma.document.create({
       data: validatedData,
       include: {
@@ -43,7 +41,6 @@ export async function POST(req: Request) {
         children: true
       }
     });
-
     return NextResponse.json(document, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -53,45 +50,12 @@ export async function POST(req: Request) {
       );
     }
 
-    console.error("Error creating document:", error);
+    console.log("Error creating document");
     return NextResponse.json(
-      { error: "Failed to create document" },
+      { error },
       { status: 500 }
     );
   }
 }
 
-export async function PUT(req: Request) {
-  try {
-    const body = await req.json();
-    const { id, userId, content, coverImage, icon } = body;
 
-    if (!id || !userId) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
-
-    const document = await prisma.document.update({
-      where: { id },
-      data: {
-        content,
-        coverImage,
-        icon,
-      },
-      include: {
-        parent: true,
-        children: true
-      }
-    });
-
-    return NextResponse.json(document, { status: 200 });
-  } catch (error) {
-    console.error("Error updating document:", error);
-    return NextResponse.json(
-      { error: "Failed to update document" },
-      { status: 500 }
-    );
-  }
-}

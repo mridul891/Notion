@@ -1,12 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { z } from "zod";
-import { useEffect } from "react";
+
+
 
 // Validation schema for document update
 const updateDocumentSchema = z.object({
-  id: z.string().min(1, "Document ID is required"),
-  userId: z.string().min(1, "User ID is required"),
   title: z.string().min(1, "Title is required").optional(),
   content: z.string().optional(),
   isArchieved: z.boolean().optional(),
@@ -14,21 +13,27 @@ const updateDocumentSchema = z.object({
   isShareable :z.boolean().optional()
 });
 
-export async function PATCH(req: Request) {
-
-
-
+export async function PUT(req: NextRequest) {
   try {
     const body = await req.json();
+    console.log("the body is " , body)
+    const userId = req.nextUrl.searchParams.get("userId") as string;
+    const id = req.nextUrl.searchParams.get("id") as string
+    // console.log("the value of userId is " , userId)
+    // const id = req.url.valueOf();
+    // const id = searchParams.get("id");
+    console.log("the values of id is " , id)
+    console.log("the values of id is " , userId)
+
 
     // Validate request body
     const validatedData = updateDocumentSchema.parse(body);
-
+    console.log("the validatedDatas is " ,validatedData)
     // Check if document exists and belongs to user
-    const existingDocument = await prisma.document.findFirst({
+    const existingDocument = await prisma.document.findUnique({
       where: {
-        id: validatedData.id,
-        userId: validatedData.userId,
+        id,
+        userId:userId,
       },
     });
 
@@ -40,7 +45,7 @@ export async function PATCH(req: Request) {
     }
 
     const document = await prisma.document.update({
-      where: { id: validatedData.id },
+      where: { id },
       data: {
         title: validatedData?.title,
         content: validatedData?.content,
@@ -48,12 +53,8 @@ export async function PATCH(req: Request) {
         coverImage: validatedData?.coverImage,
         isShareable:validatedData?.isShareable
       },
-      include: {
-        parent: true,
-        children: true
-      }
+     
     });
-
     return NextResponse.json(document, { status: 200 });
   } catch (error) {
     if (error instanceof z.ZodError) {

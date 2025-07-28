@@ -4,8 +4,11 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { PlusCircle } from "lucide-react";
+import { useEffect } from "react";
 const DoucmentsPage = () => {
   const { data: session } = useSession();
+
+  
 
   return (
     <div className="h-full flex flex-col items-center justify-center space-y-4">

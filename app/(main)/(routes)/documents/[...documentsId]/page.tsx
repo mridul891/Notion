@@ -1,10 +1,7 @@
 
-import Tiptap from "@/components/TipTap";
-import React from "react";
-
+import TipTap from "./TipTap";
 const page = () => {
-
-  return <Tiptap />;
+  return <TipTap />;
 };
 
 export default page;

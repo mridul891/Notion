@@ -4,12 +4,30 @@ import { NextResponse, NextRequest } from "next/server";
 export async function GET(req: NextRequest) {
   try {
     const userId = req.nextUrl.searchParams.get("userId");
+    const id = req.nextUrl.searchParams.get("id");
 
     if (!userId) {
       return NextResponse.json(
         { error: "Missing userId parameter" },
         { status: 400 }
       );
+    }
+
+    if (id) {
+      // Fetch a single document by id and userId
+      const document = await prisma.document.findUnique({
+        where: {
+          id,
+          userId,
+        },
+      });
+      if (!document) {
+        return NextResponse.json(
+          { error: "Document not found or unauthorized" },
+          { status: 404 }
+        );
+      }
+      return NextResponse.json({ document }, { status: 200 });
     }
 
     const documents = await prisma.document.findMany({

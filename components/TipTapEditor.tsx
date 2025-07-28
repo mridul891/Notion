@@ -9,9 +9,12 @@ import { useEffect, useState } from "react";
 
 import { TextAlign } from "@tiptap/extension-text-align";
 import { MenuBar } from "./MenuBar";
+import axios from "axios";
+import { useSession } from "next-auth/react";
+import { useParams, useSearchParams } from "next/navigation";
 
-export default function TiptapEditor({}) {
-  const [content, setContent] = useState("");
+export default function TiptapEditor({content , onEditorContentSave}) {
+
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -31,18 +34,18 @@ export default function TiptapEditor({}) {
     },
   });
 
+  // Set editor content when prop changes
   useEffect(() => {
-    const getData = setTimeout(() => {
-      
-    }, 2000);
-  }, [content]);
+    if (editor && content !== undefined && content !== null) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
 
-  useEffect(() => {
-    return () => {
-      editor?.destroy();
-    };
-  }, [editor]);
-
+  const handleChange = () => {
+    const html = editor?.getHTML();
+    onEditorContentSave(html);
+  };
+  
   return (
     <div className="max-w-4xl mx-auto  ">
       <div className=" rounded-md p-4  border-none focus-within:outline-none">
@@ -50,8 +53,7 @@ export default function TiptapEditor({}) {
         <EditorContent
           editor={editor}
           className="mt-4 min-h-screen focus:outline-none focus:ring-0 border-none"
-          onKeyDown={() => setContent(JSON.stringify(editor?.getHTML()))}
-          value={content}
+          onKeyDown={()=>handleChange()}
         />
       </div>
     </div>
