@@ -10,8 +10,6 @@ import { useEffect, useState } from "react";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { MenuBar } from "./MenuBar";
 import axios from "axios";
-import { useSession } from "next-auth/react";
-import { useParams, useSearchParams } from "next/navigation";
 import { TableKit } from '@tiptap/extension-table'
 import CodeBlock from '@tiptap/extension-code-block'
 
