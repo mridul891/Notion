@@ -14,14 +14,29 @@ import {
   Code2,
   CircleParking,
 } from "lucide-react";
+import { useCallback } from "react";
 
-export function MenuBar({ editor }: { editor: any }) {
+export function MenuBar({ editor, onGenerateWithAI }: { editor: any, onGenerateWithAI?: (headingText: string) => void }) {
   if (!editor) return null;
 
   const buttonClass = (active: boolean) =>
     `p-2 rounded-sm transition hover:bg-white/10 ${
       active ? "bg-white/20 text-white" : "text-white"
     };`;
+
+  const isHeading = editor && editor.isActive('heading');
+  const getSelectedHeadingText = useCallback(() => {
+    if (!editor) return '';
+    const { state } = editor;
+    const { from, to } = state.selection;
+    let headingText = '';
+    state.doc.nodesBetween(from, to, (node) => {
+      if (node.type.name === 'heading') {
+        headingText = node.textContent;
+      }
+    });
+    return headingText;
+  }, [editor]);
 
   return (
     <div className="flex justify-between  flex-wrap py-2">
@@ -114,6 +129,18 @@ export function MenuBar({ editor }: { editor: any }) {
       >
         <Code2 size={18} />
       </button>
+      {isHeading && onGenerateWithAI && (
+        <button
+          type="button"
+          className="ml-2 px-2 py-1 bg-blue-500 text-white rounded"
+          onClick={() => {
+            const headingText = getSelectedHeadingText();
+            if (headingText) onGenerateWithAI(headingText);
+          }}
+        >
+          Generate with AI
+        </button>
+      )}
     </div>
   );
 }

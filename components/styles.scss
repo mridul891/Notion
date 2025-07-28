@@ -40,3 +40,21 @@
     font-size: 1rem; 
   }
 }
+.tiptap pre, .prose pre {
+  background: #23272e;
+  color: #f8f8f2;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  overflow-x: auto;
+  font-size: 0.95rem;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', 'Liberation Mono', 'Courier New', monospace;
+  margin: 1.5em 0;
+}
+.tiptap code, .prose code {
+
+  color: #ffffff;
+  border-radius: 0.3rem;
+  padding: 0.2em 0.4em;
+  font-size: 0.95em;
+  font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', 'Liberation Mono', 'Courier New', monospace;
+}

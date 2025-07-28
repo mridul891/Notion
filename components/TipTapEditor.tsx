@@ -12,9 +12,11 @@ import { MenuBar } from "./MenuBar";
 import axios from "axios";
 import { useSession } from "next-auth/react";
 import { useParams, useSearchParams } from "next/navigation";
+import { TableKit } from '@tiptap/extension-table'
+import CodeBlock from '@tiptap/extension-code-block'
 
 export default function TiptapEditor({content , onEditorContentSave}) {
-
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -24,6 +26,8 @@ export default function TiptapEditor({content , onEditorContentSave}) {
         levels: [1, 2, 3],
       }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
+      CodeBlock,
+      TableKit
     ],
     content: ``,
     editorProps: {
@@ -32,28 +36,55 @@ export default function TiptapEditor({content , onEditorContentSave}) {
           "prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-screen",
       },
     },
+    onUpdate: ({ editor }) => {
+      // Only call save after initialization to avoid cursor jumping
+      if (isInitialized) {
+        const html = editor.getHTML();
+        onEditorContentSave(html);
+      }
+    },
   });
 
-  // Set editor content when prop changes
+  // Set editor content when prop changes (only on initial load)
   useEffect(() => {
     if (editor && content !== undefined && content !== null) {
-      editor.commands.setContent(content);
+      // Only set content if editor is empty or significantly different
+      const currentContent = editor.getHTML();
+      if (currentContent === '<p></p>' || currentContent === '' || !currentContent) {
+        editor.commands.setContent(content);
+        setIsInitialized(true);
+      }
     }
   }, [content, editor]);
 
-  const handleChange = () => {
-    const html = editor?.getHTML();
-    onEditorContentSave(html);
+  // Mark as initialized when editor is ready
+  useEffect(() => {
+    if (editor && !isInitialized) {
+      setIsInitialized(true);
+    }
+  }, [editor, isInitialized]);
+
+  // Handler for AI content generation
+  const handleGenerateWithAI = async (headingText: string) => {
+    if (!editor) return;
+    // Call backend API to generate content
+    try {
+      const response = await axios.post("/api/gemini-generate", { prompt: headingText });
+      const generatedContent = response.data.content;
+      // Insert generated content below the heading
+      editor.chain().focus().insertContent(generatedContent).run();
+    } catch (error) {
+      console.error("Error generating AI content:", error);
+    }
   };
-  
+
   return (
     <div className="max-w-4xl mx-auto  ">
       <div className=" rounded-md p-4  border-none focus-within:outline-none">
-        {editor && <MenuBar editor={editor} />}
+        {editor && <MenuBar editor={editor} onGenerateWithAI={handleGenerateWithAI} />}
         <EditorContent
           editor={editor}
           className="mt-4 min-h-screen focus:outline-none focus:ring-0 border-none"
-          onKeyDown={()=>handleChange()}
         />
       </div>
     </div>
