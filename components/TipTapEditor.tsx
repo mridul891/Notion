@@ -10,7 +10,6 @@ import { useEffect, useState } from "react";
 import { TextAlign } from "@tiptap/extension-text-align";
 import { MenuBar } from "./MenuBar";
 import axios from "axios";
-import { TableKit } from '@tiptap/extension-table'
 import CodeBlock from '@tiptap/extension-code-block'
 
 interface TiptapEditorProps {
@@ -29,8 +28,7 @@ export default function TiptapEditor({content , onEditorContentSave}: TiptapEdit
         levels: [1, 2, 3],
       }),
       TextAlign.configure({ types: ["heading", "paragraph"] }),
-      CodeBlock,
-      TableKit
+      CodeBlock
     ],
     content: ``,
     editorProps: {
