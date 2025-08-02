@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing Gemini API key" }, { status: 500 });
     }
     // Add a secondary prompt to instruct Gemini to return HTML
-    const secondaryPrompt = "Return the output as HTML so that it can be rendered in a rich text editor.";
+    const secondaryPrompt = " the output should be in the form of  HTML so that it can be rendered in a rich text editor  And it should only return the body tag content without any additional text or formatting. ";
     const fullPrompt = `${secondaryPrompt}\n${prompt}`;
     const geminiRes = await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey, {
       method: "POST",

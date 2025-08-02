@@ -1,7 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight, ChevronLeft, MenuIcon, PlusCircle, Search } from "lucide-react";
-import { ComponentRef, useEffect, useRef, useState } from "react";
+import { ComponentRef, useEffect, useRef, useState, useCallback } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import UserItems from "./User-item";
 import { useSession } from "next-auth/react";
@@ -37,13 +37,7 @@ const Navigation = () => {
   const [newDocumentTitle, setNewDocumentTitle] = useState("");
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (session?.user?.email) {
-      fetchDocuments();
-    }
-  }, [reFreshFetchDocuments, session?.user?.email]);
-
-  const fetchDocuments = async () => {
+  const fetchDocuments = useCallback(async () => {
     if (!session?.user?.email) return;
     
     try {
@@ -61,7 +55,13 @@ const Navigation = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session?.user?.email]);
+
+  useEffect(() => {
+    if (session?.user?.email) {
+      fetchDocuments();
+    }
+  }, [fetchDocuments, reFreshFetchDocuments, session?.user?.email]);
 
   const handleOnMouseDown = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>

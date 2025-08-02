@@ -15,16 +15,9 @@ import {
   CircleParking,
 } from "lucide-react";
 import { useCallback } from "react";
+import { Editor } from "@tiptap/react";
 
-export function MenuBar({ editor, onGenerateWithAI }: { editor: any, onGenerateWithAI?: (headingText: string) => void }) {
-  if (!editor) return null;
-
-  const buttonClass = (active: boolean) =>
-    `p-2 rounded-sm transition hover:bg-white/10 ${
-      active ? "bg-white/20 text-white" : "text-white"
-    };`;
-
-  const isHeading = editor && editor.isActive('heading');
+export function MenuBar({ editor, onGenerateWithAI }: { editor: Editor | null, onGenerateWithAI?: (headingText: string) => void }) {
   const getSelectedHeadingText = useCallback(() => {
     if (!editor) return '';
     const { state } = editor;
@@ -37,6 +30,13 @@ export function MenuBar({ editor, onGenerateWithAI }: { editor: any, onGenerateW
     });
     return headingText;
   }, [editor]);
+
+  if (!editor) return null;
+
+  const buttonClass = (active: boolean) =>
+    `p-2 rounded-sm transition hover:bg-white/10 ${
+      active ? "bg-white/20 text-white" : "text-white"
+    };`;
 
   return (
     <div className="flex justify-between  flex-wrap py-2">
@@ -129,7 +129,7 @@ export function MenuBar({ editor, onGenerateWithAI }: { editor: any, onGenerateW
       >
         <Code2 size={18} />
       </button>
-      {isHeading && onGenerateWithAI && (
+       {onGenerateWithAI && (
         <button
           type="button"
           className="ml-2 px-2 py-1 bg-blue-500 text-white rounded"

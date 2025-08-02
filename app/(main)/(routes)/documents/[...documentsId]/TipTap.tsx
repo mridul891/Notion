@@ -29,7 +29,6 @@ const TipTap = () => {
       }
     };
     fetchContent();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [documentsId.documentsId, session?.user?.email]);
 
   // Save document content on change

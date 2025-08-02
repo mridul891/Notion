@@ -13,7 +13,12 @@ import axios from "axios";
 import { TableKit } from '@tiptap/extension-table'
 import CodeBlock from '@tiptap/extension-code-block'
 
-export default function TiptapEditor({content , onEditorContentSave}) {
+interface TiptapEditorProps {
+  content: string;
+  onEditorContentSave: (html: string) => void;
+}
+
+export default function TiptapEditor({content , onEditorContentSave}: TiptapEditorProps) {
   const [isInitialized, setIsInitialized] = useState(false);
 
   const editor = useEditor({
