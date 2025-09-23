@@ -1,6 +1,13 @@
 "use client";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight, ChevronLeft, MenuIcon, PlusCircle, Search } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  ChevronLeft,
+  MenuIcon,
+  PlusCircle,
+  Search,
+} from "lucide-react";
 import { ComponentRef, useEffect, useRef, useState, useCallback } from "react";
 import { useMediaQuery } from "usehooks-ts";
 import UserItems from "./User-item";
@@ -9,9 +16,16 @@ import axios from "axios";
 import { Item } from "@/components/Item";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { DialogComponent } from "./DialogComponent";
 
 interface Post {
   id: string;
@@ -39,7 +53,7 @@ const Navigation = () => {
 
   const fetchDocuments = useCallback(async () => {
     if (!session?.user?.email) return;
-    
+
     try {
       setIsLoading(true);
       const response = await axios.get(`/api/documents/get`, {
@@ -62,6 +76,14 @@ const Navigation = () => {
       fetchDocuments();
     }
   }, [fetchDocuments, reFreshFetchDocuments, session?.user?.email]);
+
+  useEffect(() => {
+    const handleGlobalRefresh = () => {
+      setReFreshFetchDocuments((prev) => !prev);
+    };
+    window.addEventListener("documents:refresh", handleGlobalRefresh);
+    return () => window.removeEventListener("documents:refresh", handleGlobalRefresh);
+  }, []);
 
   const handleOnMouseDown = (
     event: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -157,13 +179,19 @@ const Navigation = () => {
     }
   };
 
-  const DocumentItem = ({ post, level = 0 }: { post: Post; level?: number }) => {
+  const DocumentItem = ({
+    post,
+    level = 0,
+  }: {
+    post: Post;
+    level?: number;
+  }) => {
     const [isExpanded, setIsExpanded] = useState(true);
     const hasChildren = post.children && post.children.length > 0;
 
     return (
       <div>
-        <div 
+        <div
           className="group min-h-[27px] text-sm py-1 pr-3 w-full hover:bg-purple/5 flex items-center text-muted-foreground font-medium"
           style={{ paddingLeft: `${level * 12 + 12}px` }}
         >
@@ -180,7 +208,7 @@ const Navigation = () => {
               )}
             </div>
           )}
-          <div 
+          <div
             onClick={() => router.push(`/documents/${post.id}`)}
             className="flex-1 cursor-pointer"
           >
@@ -251,9 +279,7 @@ const Navigation = () => {
               No documents found
             </div>
           ) : (
-            posts.map((post) => (
-              <DocumentItem key={post.id} post={post} />
-            ))
+            posts.map((post) => <DocumentItem key={post.id} post={post} />)
           )}
         </div>
         <div
@@ -282,7 +308,7 @@ const Navigation = () => {
         </nav>
       </div>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      {/* <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Create New Document</DialogTitle>
@@ -304,7 +330,13 @@ const Navigation = () => {
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
+
+      {isDialogOpen ? (
+        <DialogComponent open={true} onOpenChange={setIsDialogOpen} setReFreshFetchDocuments={setReFreshFetchDocuments} selectedParentId={selectedParentId}/>
+      ) : (
+        <DialogComponent open={false} onOpenChange={setIsDialogOpen} setReFreshFetchDocuments={setReFreshFetchDocuments} selectedParentId={selectedParentId}/>
+      )}
     </>
   );
 };

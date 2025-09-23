@@ -3,12 +3,14 @@
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { PlusCircle } from "lucide-react";
+import { useState } from "react";
+import { DialogComponent } from "@/app/(main)/_components/DialogComponent";
 
 const DoucmentsPage = () => {
   const { data: session } = useSession();
-
-  
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedParentId] = useState<string | null>(null);
+  const [reFreshFetchDocuments, setReFreshFetchDocuments] = useState(false);
 
   return (
     <div className="h-full flex flex-col items-center justify-center space-y-4">
@@ -30,10 +32,25 @@ const DoucmentsPage = () => {
         Welcome to {session?.user?.name}&apos;s Jotion{" "}
       </h2>
 
-      <Button className="font-semibold ">
-        <PlusCircle className="h-4 w-2 mr-1" />
-        Create a note
+      <Button className="font-semibold" onClick={() => setIsDialogOpen(true)}>
+        Create New Document
       </Button>
+
+      {isDialogOpen ? (
+        <DialogComponent
+          open={true}
+          onOpenChange={setIsDialogOpen}
+          setReFreshFetchDocuments={setReFreshFetchDocuments}
+          selectedParentId={selectedParentId}
+        />
+      ) : (
+        <DialogComponent
+          open={false}
+          onOpenChange={setIsDialogOpen}
+          setReFreshFetchDocuments={setReFreshFetchDocuments}
+          selectedParentId={selectedParentId}
+        />
+      )}
     </div>
   );
 };

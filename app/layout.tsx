@@ -4,9 +4,17 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
+import { Plus_Jakarta_Sans } from "next/font/google";
+
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+});
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  variable: "--font-jakarta",
 });
 
 export const metadata: Metadata = {
@@ -34,7 +42,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${inter.variable} ${inter.variable} antialiased dark:bg-[#161618]`}
+        className={`${jakarta.variable} antialiased dark:bg-[#161618]`}
       >
         <SessionProvider>
           <ThemeProvider
