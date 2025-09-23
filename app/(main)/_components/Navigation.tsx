@@ -16,15 +16,7 @@ import axios from "axios";
 import { Item } from "@/components/Item";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 import { DialogComponent } from "./DialogComponent";
 
 interface Post {
@@ -48,7 +40,6 @@ const Navigation = () => {
   const [reFreshFetchDocuments, setReFreshFetchDocuments] = useState(false);
   const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newDocumentTitle, setNewDocumentTitle] = useState("");
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
 
   const fetchDocuments = useCallback(async () => {
@@ -142,42 +133,7 @@ const Navigation = () => {
     }
   };
 
-  const handleCreate = async () => {
-    if (!session?.user?.email) {
-      toast.error("Please sign in to create documents");
-      return;
-    }
 
-    if (!newDocumentTitle.trim()) {
-      toast.error("Please enter a title for the document");
-      return;
-    }
-
-    try {
-      await axios.post("/api/documents/create", {
-        title: newDocumentTitle,
-        userId: session.user.email,
-        parentDocument: selectedParentId,
-      });
-      toast.success("New note Created!");
-      setReFreshFetchDocuments((prev) => !prev);
-      setIsDialogOpen(false);
-      setNewDocumentTitle("");
-      setSelectedParentId(null);
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error)) {
-        if (error.response?.data?.message) {
-          toast.error(error.response.data.message);
-        } else {
-          toast.error("An unexpected error occurred.");
-        }
-        console.error("Axios error:", error);
-      } else {
-        console.error("Unknown error:", error);
-        toast.error("Something went wrong.");
-      }
-    }
-  };
 
   const DocumentItem = ({
     post,

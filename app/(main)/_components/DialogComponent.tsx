@@ -7,12 +7,19 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { toast } from "sonner";
 import { useSession } from "next-auth/react";
 import axios from "axios";
 
-export function DialogComponent({ open, onOpenChange,setReFreshFetchDocuments ,selectedParentId}) {
+interface DialogComponentProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  setReFreshFetchDocuments: Dispatch<SetStateAction<boolean>>;
+  selectedParentId: string | null;
+}
+
+export function DialogComponent({ open, onOpenChange, setReFreshFetchDocuments, selectedParentId }: DialogComponentProps) {
   const [value, setValue] = useState("");
   const { data: session } = useSession();
 

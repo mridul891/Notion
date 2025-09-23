@@ -1,15 +1,11 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { SessionProvider } from "next-auth/react";
 import { Toaster } from "sonner";
 import { Plus_Jakarta_Sans } from "next/font/google";
 
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],

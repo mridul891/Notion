@@ -10,7 +10,7 @@ const DoucmentsPage = () => {
   const { data: session } = useSession();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedParentId] = useState<string | null>(null);
-  const [reFreshFetchDocuments, setReFreshFetchDocuments] = useState(false);
+  const [, setReFreshFetchDocuments] = useState(false);
 
   return (
     <div className="h-full flex flex-col items-center justify-center space-y-4">
